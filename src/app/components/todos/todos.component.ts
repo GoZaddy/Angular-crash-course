@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { TodoService } from 'src/app/services/todo.service';
 import {Todo} from '../../models/Todo';
+
 
 @Component({
   selector: 'app-todos',
@@ -8,27 +10,32 @@ import {Todo} from '../../models/Todo';
 })
 export class TodosComponent implements OnInit {
   todos: Todo[] = [];
-  constructor() { }
+  constructor(private todoService: TodoService) { }
 
   // fires when the component is created. so like componentDidMount for React
-  ngOnInit(): void {
-    this.todos = [
-      {
-        id: 1,
-        title: 'Todo one',
-        completed: false
-      },
-      {
-        id: 2,
-        title: 'Todo Two',
-        completed: true
-      },
-      {
-        id: 3,
-        title: 'Todo Three',
-        completed: false
+  ngOnInit() {
+    this.todoService.getTodos().subscribe(todos => {
+      this.todos = todos;
+    });
+  }
+
+  deleteTodo(todo: Todo){
+    // update UI
+    this.todos = this.todos.filter(t => t.id !== todo.id)
+
+    //update Server
+    this.todoService.deleteTodo(todo).subscribe();
+  }
+
+  addTodo(todo: Todo){
+    // update server
+    this.todoService.addTodo(todo).subscribe(
+      t => {
+        this.todos.push(t);
       }
-    ];
+    )
+
+    // update UI
   }
 
 }
